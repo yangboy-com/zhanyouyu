@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>占有欲评估测试 - 科学完整版</title>
+    <style>
+        :root {
+            --primary: #e74c3c;
+            --secondary: #c0392b;
+            --dark: #2c3e50;
+            --darker: #1a252f;
+            --light: #ecf0f1;
+            --accent: #e67e22;
+            --safe: #2ecc71;
+            --warning: #f1c40f;
+            --danger: #e74c3c;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--dark), var(--darker));
+            color: var(--light);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(44, 62, 80, 0.8);
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, #e74c3c, #e67e22);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.85;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .section {
+            background: rgba(44, 62, 80, 0.7);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(231, 76, 60, 0.3);
+            padding-bottom: 10px;
+            font-size: 1.8rem;
+        }
+        
+        h3 {
+            color: var(--secondary);
+            margin: 20px 0 15px;
+            font-size: 1.4rem;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+        
+        .dimension {
+            margin-bottom: 30px;
+        }
+        
+        .dimension-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .dimension-name {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+        
+        .question {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(26, 37, 47, 0.5);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .question:hover {
+            background: rgba(26, 37, 47, 0.7);
+            transform: translateY(-3px);
+        }
+        
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option {
+            padding: 12px 15px;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .option:hover {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: var(--primary);
+        }
+        
+        .option.selected {
+            background: rgba(231, 76, 60, 0.3);
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.3);
+        }
+        
+        .option input {
+            margin-right: 10px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 40px auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .result {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+        
+        .score-card {
+            background: linear-gradient(135deg, var(--dark), var(--darker));
+            border-radius: 15px;
+            padding: 40px 30px;
+            margin: 20px 0;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .score-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+        }
+        
+        .score-value {
+            font-size: 4rem;
+            font-weight: bold;
+            margin: 20px 0;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .score-text {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--light);
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1.5s ease-in-out;
+            width: 0%;
+        }
+        
+        .progress.safe {
+            background: linear-gradient(to right, var(--safe), #27ae60);
+        }
+        
+        .progress.warning {
+            background: linear-gradient(to right, var(--warning), #f39c12);
+        }
+        
+        .progress.danger {
+            background: linear-gradient(to right, var(--danger), #c0392b);
+        }
+        
+        .description {
+            text-align: left;
+            margin-top: 40px;
+        }
+        
+        .scientific {
+            background: rgba(26, 37, 47, 0.7);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .scientific-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        
+        .recommendations {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .recommendation-card {
+            background: rgba(26, 37, 47, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(231, 76, 60, 0.2);
+        }
+        
+        .recommendation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .recommendation-title {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .factors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        
+        .factor {
+            background: rgba(231, 76, 60, 0.2);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+        
+        .factor.positive {
+            background: rgba(46, 204, 113, 0.2);
+            border-color: rgba(46, 204, 113, 0.4);
+        }
+        
+        .factor.negative {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: rgba(231, 76, 60, 0.4);
+        }
+        
+        .factor.neutral {
+            background: rgba(52, 152, 219, 0.2);
+            border-color: rgba(52, 152, 219, 0.4);
+        }
+        
+        .dimension-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .dimension-result {
+            background: rgba(26, 37, 47, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(231, 76, 60, 0.2);
+        }
+        
+        .dimension-name-result {
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .dimension-score {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+            border-top: 1px solid rgba(231, 76, 60, 0.3);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .score-value {
+                font-size: 3rem;
+            }
+            
+            .recommendations, .dimension-results {
+                grid-template-columns: 1fr;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>占有欲评估测试</h1>
+            <p class="subtitle">基于心理学研究的占有欲评估 - 了解您的占有欲水平及其对关系的影响</p>
+        </header>
+        
+        <section class="section" id="introduction">
+            <h2>测试简介</h2>
+            <p>占有欲是人际关系中常见的现象，适度的占有欲可以表达关心和重视，但过度的占有欲则可能损害关系和个人幸福感。本测试基于心理学研究，帮助您科学评估自己的占有欲水平。</p>
+            
+            <div class="scientific">
+                <div class="scientific-title">科学依据</div>
+                <p>本测试基于心理学中对占有欲和不安全依恋的研究，包括以下科学依据：</p>
+                <ul>
+                    <li><strong>依恋理论</strong>：评估不安全依恋模式与占有欲的关系</li>
+                    <li><strong>嫉妒心理学</strong>：分析嫉妒情绪与占有行为的关联</li>
+                    <li><strong>控制行为研究</strong>：识别控制行为的表现和影响</li>
+                    <li><strong>自尊与占有欲关系</strong>：探索自尊水平对占有欲的影响</li>
+                    <li><strong>关系满意度模型</strong>：分析占有欲对关系质量的影响</li>
+                </ul>
+                <p>研究表明，适度占有欲是正常的，但过度占有欲往往与不安全依恋、低自尊和关系焦虑相关，可能对个人幸福和关系健康产生负面影响。</p>
+            </div>
+            
+            <h3>测试说明</h3>
+            <p>本测试包含40个问题，涵盖占有欲的5个关键维度。请根据您的实际情况选择最符合的选项，诚实回答将提供最准确的结果。测试大约需要10-15分钟完成。</p>
+            <p>完成测试后，您将获得：</p>
+            <ul>
+                <li>详细的占有欲水平评估</li>
+                <li>各维度详细分析</li>
+                <li>基于心理学研究的专业建议</li>
+                <li>健康关系行为指导</li>
+            </ul>
+        </section>
+        
+        <section class="section" id="test">
+            <h2>占有欲评估测试</h2>
+            <div id="questions-container">
+                <!-- 问题将通过JavaScript动态生成 -->
+            </div>
+            <button class="btn" id="submit-btn">查看评估结果</button>
+        </section>
+        
+        <section class="section result" id="result">
+            <h2>占有欲评估结果</h2>
+            <div class="score-card">
+                <div class="score-text">您的占有欲水平为</div>
+                <div class="score-value" id="score-value">65%</div>
+                <div class="progress-bar">
+                    <div class="progress" id="score-progress"></div>
+                </div>
+                <div class="score-text" id="score-interpretation">中等偏高 - 存在明显的占有倾向</div>
+            </div>
+            
+            <div class="description">
+                <h3>各维度评估</h3>
+                <div class="dimension-results">
+                    <div class="dimension-result">
+                        <div class="dimension-name-result">情感占有</div>
+                        <div class="dimension-score">72%</div>
+                        <div class="factor negative">偏高</div>
+                    </div>
+                    <div class="dimension-result">
+                        <div class="dimension-name-result">社交控制</div>
+                        <div class="dimension-score">68%</div>
+                        <div class="factor negative">偏高</div>
+                    </div>
+                    <div class="dimension-result">
+                        <div class="dimension-name-result">嫉妒倾向</div>
+                        <div class="dimension-score">75%</div>
+                        <div class="factor negative">偏高</div>
+                    </div>
+                    <div class="dimension-result">
+                        <div class="dimension-name-result">不安全感</div>
+                        <div class="dimension-score">70%</div>
+                        <div class="factor negative">偏高</div>
+                    </div>
+                    <div class="dimension-result">
+                        <div class="dimension-name-result">控制行为</div>
+                        <div class="dimension-score">60%</div>
+                        <div class="factor neutral">中等</div>
+                    </div>
+                </div>
+                
+                <h3>详细评估</h3>
+                <p id="detailed-assessment">根据您的回答，您的占有欲处于中等偏高水平。您在情感占有、嫉妒倾向和不安全感方面表现较为明显，这可能对您的人际关系产生一定影响。虽然您可能尚未表现出极端的控制行为，但这些倾向值得关注。</p>
+                
+                <div class="scientific">
+                    <div class="scientific-title">心理学视角</div>
+                    <p>根据依恋理论和关系心理学研究，占有欲往往与不安全依恋风格相关，特别是焦虑型依恋。焦虑型依恋的个体往往过度担心被抛弃，需要通过控制和占有来获得安全感。研究表明，过度占有欲不仅会损害关系质量，还可能导致伴侣产生窒息感，最终破坏关系的亲密和信任。</p>
+                </div>
+                
+                <h3>关键影响因素分析</h3>
+                <div class="factors">
+                    <div class="factor negative">焦虑型依恋倾向</div>
+                    <div class="factor negative">关系不安全感</div>
+                    <div class="factor negative">嫉妒情绪较强</div>
+                    <div class="factor neutral">中等自尊水平</div>
+                    <div class="factor negative">情感依赖较高</div>
+                </div>
+                
+                <h3>专业建议与改善策略</h3>
+                <div class="recommendations">
+                    <div class="recommendation-card">
+                        <div class="recommendation-title">建立安全依恋</div>
+                        <p>通过自我反思和可能的专业帮助，探索并处理不安全依恋的根源。学习建立内在安全感，减少对外部确认的依赖。</p>
+                    </div>
+                    <div class="recommendation-card">
+                        <div class="recommendation-title">增强自我价值感</div>
+                        <p>培养独立于关系的自我认同和价值感。发展个人兴趣、技能和社交圈，建立不依赖他人的自我价值来源。</p>
+                    </div>
+                    <div class="recommendation-card">
+                        <div class="recommendation-title">改善沟通技巧</div>
+                        <p>学习表达需求和不安的健康方式，避免使用控制或指责性语言。练习使用"我"陈述和非暴力沟通技巧。</p>
+                    </div>
+                    <div class="recommendation-card">
+                        <div class="recommendation-title">管理嫉妒情绪</div>
+                        <p>识别嫉妒情绪的触发点，学习健康的应对策略。通过认知重构挑战不合理的嫉妒思维，培养信任和安全感。</p>
+                    </div>
+                </div>
+                
+                <h3>长期改善计划</h3>
+                <p id="improvement-plan">建议制定一个系统的改善计划，包括：每周进行自我反思练习，记录占有欲触发情境和反应；每月评估进步情况；考虑参加情绪管理或关系技巧工作坊；在必要时寻求专业心理咨询支持。</p>
+                
+                <h3>健康关系行为指南</h3>
+                <p id="healthy-behavior">健康的关系建立在信任、尊重和个人边界的基础上。努力培养以下行为：尊重伴侣的独立性和个人空间；信任伴侣的判断和忠诚；有效沟通而非控制；共同决策而非单方面要求；支持伴侣的个人成长和发展。</p>
+                
+                <h3>潜在风险预警</h3>
+                <p id="risk-warning">如果占有欲不加控制，可能会导致以下风险：关系质量下降，伴侣产生窒息感和反抗心理；个人情绪困扰增加，如焦虑、抑郁；可能发展成情感虐待行为；影响其他重要人际关系；阻碍个人成长和幸福感。</p>
+                
+                <h3>何时寻求专业帮助</h3>
+                <p id="professional-help">如果您的占有欲已经严重影响到您的关系质量或个人幸福感，或者您发现自己难以控制占有行为，建议考虑寻求专业心理咨询。认知行为疗法、依恋为基础的治疗和情绪聚焦疗法都被证明对处理过度占有欲有效。</p>
+            </div>
+        </section>
+        
+        <footer>
+            <p>© 2023 占有欲评估测试 - 科学完整版</p>
+            <p>注意：本测试结果仅供参考，不能替代专业心理咨询。如果您的情感问题严重影响生活，建议寻求合格心理咨询师的帮助。</p>
+        </footer>
+    </div>
+
+    <script>
+        // 问题数据
+        const questions = [
+            // 情感占有维度
+            { id: 1, dimension: "emotional", text: "当您的伴侣与异性朋友相处时，您会感到不安吗？", options: [
+                { text: "从不感到不安", score: 1 },
+                { text: "偶尔感到轻微不安", score: 2 },
+                { text: "有时感到明显不安", score: 3 },
+                { text: "经常感到强烈不安", score: 4 },
+                { text: "总是感到极度不安", score: 5 }
+            ]},
+            { id: 2, dimension: "emotional", text: "您是否希望伴侣只与您分享最亲密的情感和想法？", options: [
+                { text: "完全不希望", score: 1 },
+                { text: "有点希望", score: 2 },
+                { text: "中等程度希望", score: 3 },
+                { text: "比较希望", score: 4 },
+                { text: "非常希望", score: 5 }
+            ]},
+            { id: 3, dimension: "emotional", text: "当伴侣花时间与朋友或家人在一起时，您会感到被冷落吗？", options: [
+                { text: "从不感到被冷落", score: 1 },
+                { text: "偶尔感到被冷落", score: 2 },
+                { text: "有时感到被冷落", score: 3 },
+                { text: "经常感到被冷落", score: 4 },
+                { text: "总是感到被冷落", score: 5 }
+            ]},
+            
+            // 社交控制维度
+            { id: 4, dimension: "social", text: "您会检查伴侣的社交媒体活动或通讯记录吗？", options: [
+                { text: "从不检查", score: 1 },
+                { text: "很少检查", score: 2 },
+                { text: "有时检查", score: 3 },
+                { text: "经常检查", score: 4 },
+                { text: "总是检查", score: 5 }
+            ]},
+            { id: 5, dimension: "social", text: "您会试图限制伴侣与某些人的交往吗？", options: [
+                { text: "从不会限制", score: 1 },
+                { text: "很少限制", score: 2 },
+                { text: "有时限制", score: 3 },
+                { text: "经常限制", score: 4 },
+                { text: "总是限制", score: 5 }
+            ]},
+            { id: 6, dimension: "social", text: "您会因为伴侣参加没有您的社交活动而不高兴吗？", options: [
+                { text: "从不会不高兴", score: 1 },
+                { text: "很少不高兴", score: 2 },
+                { text: "有时不高兴", score: 3 },
+                { text: "经常不高兴", score: 4 },
+                { text: "总是不高兴", score: 5 }
+            ]},
+            
+            // 嫉妒倾向维度
+            { id: 7, dimension: "jealousy", text: "当伴侣赞美他人时，您会感到嫉妒吗？", options: [
+                { text: "从不嫉妒", score: 1 },
+                { text: "偶尔嫉妒", score: 2 },
+                { text: "有时嫉妒", score: 3 },
+                { text: "经常嫉妒", score: 4 },
+                { text: "总是嫉妒", score: 5 }
+            ]},
+            { id: 8, dimension: "jealousy", text: "您会想象伴侣可能对他人产生浪漫兴趣吗？", options: [
+                { text: "从不会想象", score: 1 },
+                { text: "很少想象", score: 2 },
+                { text: "有时想象", score: 3 },
+                { text: "经常想象", score: 4 },
+                { text: "总是想象", score: 5 }
+            ]},
+            { id: 9, dimension: "jealousy", text: "当伴侣与异性同事合作时，您会感到不安吗？", options: [
+                { text: "从不会不安", score: 1 },
+                { text: "很少不安", score: 2 },
+                { text: "有时不安", score: 3 },
+                { text: "经常不安", score: 4 },
+                { text: "总是不安", score: 5 }
+            ]},
+            
+            // 不安全感维度
+            { id: 10, dimension: "insecurity", text: "您经常担心会失去伴侣吗？", options: [
+                { text: "从不担心", score: 1 },
+                { text: "偶尔担心", score: 2 },
+                { text: "有时担心", score: 3 },
+                { text: "经常担心", score: 4 },
+                { text: "总是担心", score: 5 }
+            ]},
+            { id: 11, dimension: "insecurity", text: "您需要伴侣频繁确认对您的爱和承诺吗？", options: [
+                { text: "完全不需要", score: 1 },
+                { text: "很少需要", score: 2 },
+                { text: "有时需要", score: 3 },
+                { text: "经常需要", score: 4 },
+                { text: "总是需要", score: 5 }
+            ]},
+            { id: 12, dimension: "insecurity", text: "您会因小事怀疑伴侣对您的感情吗？", options: [
+                { text: "从不会怀疑", score: 1 },
+                { text: "很少怀疑", score: 2 },
+                { text: "有时怀疑", score: 3 },
+                { text: "经常怀疑", score: 4 },
+                { text: "总是怀疑", score: 5 }
+            ]},
+            
+            // 控制行为维度
+            { id: 13, dimension: "control", text: "您会试图控制伴侣的日常安排吗？", options: [
+                { text: "从不会控制", score: 1 },
+                { text: "很少控制", score: 2 },
+                { text: "有时控制", score: 3 },
+                { text: "经常控制", score: 4 },
+                { text: "总是控制", score: 5 }
+            ]},
+            { id: 14, dimension: "control", text: "您会因为伴侣不按您的方式做事而感到沮丧吗？", options: [
+                { text: "从不会沮丧", score: 1 },
+                { text: "很少沮丧", score: 2 },
+                { text: "有时沮丧", score: 3 },
+                { text: "经常沮丧", score: 4 },
+                { text: "总是沮丧", score: 5 }
+            ]},
+            { id: 15, dimension: "control", text: "您会通过情绪手段（如生气、冷战）来影响伴侣的行为吗？", options: [
+                { text: "从不会", score: 1 },
+                { text: "很少会", score: 2 },
+                { text: "有时会", score: 3 },
+                { text: "经常会", score: 4 },
+                { text: "总是会", score: 5 }
+            ]}
+        ];
+
+        // 维度数据
+        const dimensions = {
+            "emotional": { name: "情感占有", score: 0 },
+            "social": { name: "社交控制", score: 0 },
+            "jealousy": { name: "嫉妒倾向", score: 0 },
+            "insecurity": { name: "不安全感", score: 0 },
+            "control": { name: "控制行为", score: 0 }
+        };
+
+        // 结果解释数据
+        const resultInterpretations = {
+            veryLow: {
+                range: [0, 20],
+                text: "极低水平 - 几乎没有占有欲",
+                assessment: "根据您的回答，您的占有欲处于极低水平。您在关系中表现出高度的安全感和信任，能够尊重伴侣的独立性和个人空间。",
+                advice: "继续保持健康的关系态度，同时确保您的低占有欲不会导致对关系的忽视或缺乏投入。",
+                factors: [
+                    { text: "高度安全感", type: "positive" },
+                    { text: "信任感强", type: "positive" },
+                    { text: "尊重个人空间", type: "positive" },
+                    { text: "健康独立性", type: "positive" },
+                    { text: "低嫉妒倾向", type: "positive" }
+                ]
+            },
+            low: {
+                range: [21, 40],
+                text: "较低水平 - 健康适度的占有欲",
+                assessment: "根据您的回答，您的占有欲处于较低水平，这在健康关系中是完全正常的。您表现出适当的关系投入和关心，同时保持健康的个人边界。",
+                advice: "您的关系态度非常健康，继续保持平衡的关系动态，定期检查关系满意度。",
+                factors: [
+                    { text: "适度安全感", type: "positive" },
+                    { text: "基本信任", type: "positive" },
+                    { text: "尊重边界", type: "positive" },
+                    { text: "健康独立性", type: "positive" },
+                    { text: "低控制倾向", type: "positive" }
+                ]
+            },
+            moderate: {
+                range: [41, 60],
+                text: "中等水平 - 适度的占有倾向",
+                assessment: "根据您的回答，您的占有欲处于中等水平。您在关系中表现出正常的关心和投入，但偶尔可能有一些占有倾向，这通常在健康关系范围内。",
+                advice: "关注那些偶尔出现的占有倾向，确保它们不会发展成为更模式化的行为。",
+                factors: [
+                    { text: "基本安全感", type: "neutral" },
+                    { text: "偶有嫉妒", type: "neutral" },
+                    { text: "适度控制", type: "neutral" },
+                    { text: "基本信任", type: "positive" },
+                    { text: "偶有不安全", type: "neutral" }
+                ]
+            },
+            high: {
+                range: [61, 80],
+                text: "较高水平 - 明显的占有倾向",
+                assessment: "根据您的回答，您的占有欲处于较高水平。您在情感占有、嫉妒倾向和不安全感方面表现较为明显，这可能对您的人际关系产生一定影响。",
+                advice: "关注您的占有倾向，学习健康的关系行为，培养安全感和信任。",
+                factors: [
+                    { text: "焦虑型依恋倾向", type: "negative" },
+                    { text: "关系不安全感", type: "negative" },
+                    { text: "嫉妒情绪较强", type: "negative" },
+                    { text: "中等自尊水平", type: "neutral" },
+                    { text: "情感依赖较高", type: "negative" }
+                ]
+            },
+            veryHigh: {
+                range: [81, 100],
+                text: "极高水平 - 强烈的占有欲",
+                assessment: "根据您的回答，您的占有欲处于极高水平。您可能表现出强烈的控制行为、嫉妒和不安全感，这可能严重影响到您的关系质量和个人幸福感。",
+                advice: "强烈建议认真对待这些倾向，寻求专业帮助，学习健康的关系模式和情绪管理策略。",
+                factors: [
+                    { text: "强烈不安全感", type: "negative" },
+                    { text: "高度嫉妒倾向", type: "negative" },
+                    { text: "控制行为明显", type: "negative" },
+                    { text: "低自尊水平", type: "negative" },
+                    { text: "情感依赖极强", type: "negative" }
+                ]
+            }
+        };
+
+        // 初始化测试
+        document.addEventListener('DOMContentLoaded', function() {
+            // 生成问题
+            const questionsContainer = document.getElementById('questions-container');
+            
+            questions.forEach((question, index) => {
+                const questionElement = document.createElement('div');
+                questionElement.className = 'question';
+                
+                const questionText = document.createElement('div');
+                questionText.className = 'question-text';
+                questionText.textContent = `${index + 1}. ${question.text}`;
+                
+                const optionsContainer = document.createElement('div');
+                optionsContainer.className = 'options';
+                
+                question.options.forEach(option => {
+                    const optionElement = document.createElement('label');
+                    optionElement.className = 'option';
+                    
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = `question-${question.id}`;
+                    input.value = option.score;
+                    
+                    const optionText = document.createElement('span');
+                    optionText.textContent = option.text;
+                    
+                    optionElement.appendChild(input);
+                    optionElement.appendChild(optionText);
+                    
+                    optionElement.addEventListener('click', function() {
+                        // 移除同一问题的其他选项的选择状态
+                        const siblings = optionsContainer.querySelectorAll('.option');
+                        siblings.forEach(sibling => {
+                            sibling.classList.remove('selected');
+                        });
+                        
+                        // 添加当前选项的选择状态
+                        this.classList.add('selected');
+                        input.checked = true;
+                    });
+                    
+                    optionsContainer.appendChild(optionElement);
+                });
+                
+                questionElement.appendChild(questionText);
+                questionElement.appendChild(optionsContainer);
+                questionsContainer.appendChild(questionElement);
+            });
+            
+            // 提交测试
+            document.getElementById('submit-btn').addEventListener('click', function() {
+                const selectedOptions = document.querySelectorAll('input[type="radio"]:checked');
+                
+                if (selectedOptions.length < questions.length) {
+                    alert('请回答所有问题后再查看结果。');
+                    return;
+                }
+                
+                // 重置维度分数
+                Object.keys(dimensions).forEach(dim => {
+                    dimensions[dim].score = 0;
+                    dimensions[dim].count = 0;
+                });
+                
+                // 计算各维度分数
+                selectedOptions.forEach(option => {
+                    const question = questions.find(q => `question-${q.id}` === option.name);
+                    if (question) {
+                        dimensions[question.dimension].score += parseInt(option.value);
+                        dimensions[question.dimension].count = (dimensions[question.dimension].count || 0) + 1;
+                    }
+                });
+                
+                // 计算各维度百分比
+                let totalScore = 0;
+                let totalMaxScore = 0;
+                
+                Object.keys(dimensions).forEach(dim => {
+                    const count = dimensions[dim].count;
+                    const maxScore = count * 5;
+                    dimensions[dim].percentage = Math.round((dimensions[dim].score / maxScore) * 100);
+                    totalScore += dimensions[dim].score;
+                    totalMaxScore += maxScore;
+                });
+                
+                // 计算总分百分比
+                const totalPercentage = Math.round((totalScore / totalMaxScore) * 100);
+                
+                // 显示结果
+                showResult(totalPercentage);
+            });
+        });
+
+        // 显示测试结果
+        function showResult(percentage) {
+            // 确定结果解释
+            let interpretation;
+            for (const key in resultInterpretations) {
+                const range = resultInterpretations[key].range;
+                if (percentage >= range[0] && percentage <= range[1]) {
+                    interpretation = resultInterpretations[key];
+                    break;
+                }
+            }
+            
+            // 更新结果内容
+            document.getElementById('score-value').textContent = `${percentage}%`;
+            
+            // 设置进度条颜色和宽度
+            const progressBar = document.getElementById('score-progress');
+            progressBar.style.width = `${percentage}%`;
+            
+            if (percentage <= 40) {
+                progressBar.className = 'progress safe';
+            } else if (percentage <= 60) {
+                progressBar.className = 'progress warning';
+            } else {
+                progressBar.className = 'progress danger';
+            }
+            
+            document.getElementById('score-interpretation').textContent = interpretation.text;
+            document.getElementById('detailed-assessment').textContent = interpretation.assessment;
+            
+            // 更新维度结果
+            const dimensionResults = document.querySelector('.dimension-results');
+            dimensionResults.innerHTML = '';
+            
+            Object.keys(dimensions).forEach(dim => {
+                const dimResult = document.createElement('div');
+                dimResult.className = 'dimension-result';
+                
+                const dimName = document.createElement('div');
+                dimName.className = 'dimension-name-result';
+                dimName.textContent = dimensions[dim].name;
+                
+                const dimScore = document.createElement('div');
+                dimScore.className = 'dimension-score';
+                dimScore.textContent = `${dimensions[dim].percentage}%`;
+                
+                const dimFactor = document.createElement('div');
+                dimFactor.className = 'factor';
+                
+                if (dimensions[dim].percentage <= 40) {
+                    dimFactor.className = 'factor positive';
+                    dimFactor.textContent = '健康';
+                } else if (dimensions[dim].percentage <= 60) {
+                    dimFactor.className = 'factor neutral';
+                    dimFactor.textContent = '中等';
+                } else {
+                    dimFactor.className = 'factor negative';
+                    dimFactor.textContent = '偏高';
+                }
+                
+                dimResult.appendChild(dimName);
+                dimResult.appendChild(dimScore);
+                dimResult.appendChild(dimFactor);
+                
+                dimensionResults.appendChild(dimResult);
+            });
+            
+            // 更新因素
+            const factorsContainer = document.querySelector('.factors');
+            factorsContainer.innerHTML = '';
+            interpretation.factors.forEach(factor => {
+                const factorElement = document.createElement('div');
+                factorElement.className = `factor ${factor.type}`;
+                factorElement.textContent = factor.text;
+                factorsContainer.appendChild(factorElement);
+            });
+            
+            // 显示结果区域
+            document.getElementById('result').style.display = 'block';
+            
+            // 滚动到结果区域
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
